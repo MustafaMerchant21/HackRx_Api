@@ -8,8 +8,8 @@ class DocumentParser:
     def __init__(self):
         # TODO: Initialize parsing dependencies
         pass
-    
-    async def parse_files(self, files: List[UploadFile]) -> List[Tuple[str, Dict[str, Any]]]:
+     
+    async def parse_files(self, files: List[UploadFile]) -> List[Tuple[str, Dict[str, Any]]]: 
         """
         Main function of this file. Use below helper methods inside this method effectively to Parse uploaded files and extract text content
         Returns: List of (text_content, metadata) tuples

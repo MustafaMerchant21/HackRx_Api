@@ -7,7 +7,7 @@ class RetrievalService:
         # TODO: Initialize retrieval components
         pass
     
-    async def search_similar_chunks(self, query: str, top_k: int = 10) -> List[Dict[str, Any]]:
+    async def search_similar_chunks(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
         """
         Main function of this file. Search for semantically similar chunks
 

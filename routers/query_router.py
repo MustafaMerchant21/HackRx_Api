@@ -36,25 +36,25 @@ async def process_query_with_documents(
     Main RAG pipeline endpoint - processes documents and returns structured decisions
     """
     try:
-        # Step 1: Parse uploaded documents
+        # Step 1: Parse uploaded documents  # Harshal
         parsed_documents = await parse_uploaded_files(files)
         
-        # Step 2: Chunk the texts
+        # Step 2: Chunk the texts # Gaurav
         chunked_documents = await chunk_documents(parsed_documents)
         
-        # Step 3: Generate embeddings (parallel)
+        # Step 3: Generate embeddings (parallel) # Mustafa
         embedded_chunks = await embed_chunks_parallel(chunked_documents)
         
-        # Step 4: Store in Pinecone DB
+        # Step 4: Store in Pinecone DB # Manoj
         await store_embeddings_in_pinecone(embedded_chunks)
         
-        # Step 5: Search relevant chunks
+        # Step 5: Search relevant chunks # Mustafa
         relevant_chunks = await search_similar_chunks(query)
         
-        # Step 6: Run LLM decision pipeline
+        # Step 6: Run LLM decision pipeline # Kiran
         final_decision = await run_llm_decision_pipeline(query, relevant_chunks)
         
-        # Step 7: Return structured response
+        # Step 7: Return structured response 
         return QueryResponse(**final_decision)
     
     except Exception as e:

@@ -28,7 +28,9 @@ class TextChunker:
         # TODO: Team Member 2 - Implement metadata enhancement
         return {} # Return an empty dict for now
     
+    #Optional
     def optimize_chunk_boundaries(self, chunks: List[str]) -> List[str]:
         """Optimize chunk boundaries for better semantic coherence"""
         # TODO: Team Member 2 - Implement chunk boundary optimization
         return [] # Return an empty list for now
+ 
