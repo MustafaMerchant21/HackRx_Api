@@ -71,44 +71,44 @@ class EmbeddingService:
         batches = self.prepare_embedding_batch(chunks, self.batch_size)
         
         logger.debug(f"Created {len(batches)} batches for embedding")
-        # print batches for debugging
-        for idx, batch in enumerate(batches):
-            logger.debug(f"Batch {idx}: {len(batch)} chunks")
-        return [chunk for batch in batches for chunk in batch]        
-        # # Create semaphore to limit concurrent API calls
-        # semaphore = asyncio.Semaphore(self.max_concurrent)
+        # # print batches for debugging
+        # for idx, batch in enumerate(batches):
+        #     logger.debug(f"Batch {idx}: {len(batch)} chunks")
+        # return [chunk for batch in batches for chunk in batch]        
+        # Create semaphore to limit concurrent API calls
+        semaphore = asyncio.Semaphore(self.max_concurrent)
         
-        # # Process batches concurrently
-        # tasks = []
-        # for batch_idx, batch in enumerate(batches):
-        #     task = self._process_batch_with_semaphore(semaphore, batch, batch_idx)
-        #     tasks.append(task)
+        # Process batches concurrently
+        tasks = []
+        for batch_idx, batch in enumerate(batches):
+            task = self._process_batch_with_semaphore(semaphore, batch, batch_idx)
+            tasks.append(task)
         
-        # # Wait for all batches to complete
-        # batch_results = await asyncio.gather(*tasks, return_exceptions=True)
+        # Wait for all batches to complete
+        batch_results = await asyncio.gather(*tasks, return_exceptions=True)
         
-        # # Flatten results and handle exceptions with proper type checking
-        # embedded_chunks: List[Dict[str, Any]] = []
+        # Flatten results and handle exceptions with proper type checking
+        embedded_chunks: List[Dict[str, Any]] = []
         
-        # for batch_idx, result in enumerate(batch_results):
-        #     if isinstance(result, Exception):
-        #         logger.error(f"Batch {batch_idx} failed: {result}")
-        #         # Add empty embeddings for failed batch chunks
-        #         batch = batches[batch_idx]
-        #         for chunk in batch:
-        #             embedded_chunks.append({
-        #                 **chunk,
-        #                 "embedding": [0.0] * 1536,
-        #                 "embedding_error": str(result)
-        #             })
-        #     else:
-        #         if isinstance(result, list):
-        #             embedded_chunks.extend(result)
-        #         else:
-        #             logger.error(f"Unexpected result type for batch {batch_idx}: {type(result)}")
+        for batch_idx, result in enumerate(batch_results):
+            if isinstance(result, Exception):
+                logger.error(f"Batch {batch_idx} failed: {result}")
+                # Add empty embeddings for failed batch chunks
+                batch = batches[batch_idx]
+                for chunk in batch:
+                    embedded_chunks.append({
+                        **chunk,
+                        "embedding": [0.0] * 1536,
+                        "embedding_error": str(result)
+                    })
+            else:
+                if isinstance(result, list):
+                    embedded_chunks.extend(result)
+                else:
+                    logger.error(f"Unexpected result type for batch {batch_idx}: {type(result)}")
         
-        # logger.info(f"Completed embedding generation for {len(embedded_chunks)} chunks")
-        # return embedded_chunks
+        logger.info(f"Completed embedding generation for {len(embedded_chunks)} chunks")
+        return embedded_chunks
     
     async def _process_batch_with_semaphore(self, semaphore: asyncio.Semaphore, 
                                           batch: List[Dict], batch_idx: int) -> List[Dict[str, Any]]:
@@ -220,14 +220,14 @@ class EmbeddingService:
         logger.debug(f"Created {len(batches)} batches from {len(chunks)} chunks")
         return batches
 
-if __name__ == "__main__":
-    # Example usage
-    embedding_service = EmbeddingService()
+# if __name__ == "__main__":
+#     # Example usage
+#     embedding_service = EmbeddingService()
     
-    # Simulate parallel embedding generation
-    loop = asyncio.get_event_loop()
-    result = loop.run_until_complete(embedding_service.embed_chunks_parallel(mock_chunks))
+#     # Simulate parallel embedding generation
+#     loop = asyncio.get_event_loop()
+#     result = loop.run_until_complete(embedding_service.embed_chunks_parallel(mock_chunks))
     
-    print("Embedded Chunks:")
-    for item in result:
-        print(item)
+#     print("Embedded Chunks:")
+#     for item in result:
+#         print(item)
