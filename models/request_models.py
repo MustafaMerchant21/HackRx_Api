@@ -1,5 +1,9 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 from typing import Optional, List
+
+class HackRxRequest(BaseModel):
+    documents: str = Field(..., description="URL to the document (PDF, DOCX, or email)")
+    questions: List[str] = Field(..., description="List of questions to answer about the document")
 
 class QueryRequest(BaseModel):
     query: str = Field(..., description="User query about insurance policy")

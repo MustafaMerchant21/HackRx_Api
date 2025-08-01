@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import uvicorn
 
-from routers import query_router
+from routers import query_router, hackrx_router
 from config.settings import get_settings
 
 settings = get_settings()
@@ -20,7 +20,7 @@ async def lifespan(app: FastAPI):
 # FastAPI app initialization
 app = FastAPI(
     title="HackRx API",
-    description="AI-powered document processing with RAG pipeline for insurance decisions",
+    description="AI-powered multimodal document processing with RAG pipeline for insurance decisions",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -36,6 +36,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(query_router.router, prefix="/api", tags=["query"])
+app.include_router(hackrx_router.router, prefix="/hackrx", tags=["hackrx"])
 
 @app.get("/")
 async def root():
@@ -44,6 +45,8 @@ async def root():
         "message": "HackRx API",
         "version": "1.0.0",
         "endpoints": {
+            "hackrx_run": "/hackrx/run",
+            "hackrx_health": "/hackrx/health",
             "query": "/api/query",
             "health": "/api/health",
             "docs": "/docs"
@@ -51,4 +54,18 @@ async def root():
     }
 
 if __name__ == "__main__":
-    uvicorn.run(app, port=8000)
+    import os
+    
+    # Check if SSL certificates exist
+    ssl_keyfile = "key.pem" if os.path.exists("key.pem") else None
+    ssl_certfile = "cert.pem" if os.path.exists("cert.pem") else None
+    
+    # Run with optional HTTPS support
+    uvicorn.run(
+        app, 
+        host="0.0.0.0",
+        port=8000,
+        ssl_keyfile=ssl_keyfile,
+        ssl_certfile=ssl_certfile,
+        ssl_keyfile_password=None
+    )

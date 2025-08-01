@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  hackrx-api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - TOGETHER_API_KEY=${TOGETHER_API_KEY}
+      - PINECONE_API_KEY=${PINECONE_API_KEY}
+      - PINECONE_ENVIRONMENT=${PINECONE_ENVIRONMENT}
+      - PINECONE_INDEX_NAME=${PINECONE_INDEX_NAME}
+      - BEARER_TOKEN=${BEARER_TOKEN}
+      - LLAMA_PARSE_API_KEY=${LLAMA_PARSE_API_KEY}
+      - MAX_FILE_SIZE=${MAX_FILE_SIZE:-52428800}
+      - CHUNK_SIZE=${CHUNK_SIZE:-1000}
+      - CHUNK_OVERLAP=${CHUNK_OVERLAP:-200}
+      - MAX_CHUNKS_PER_QUERY=${MAX_CHUNKS_PER_QUERY:-15}
+      - MAX_RESPONSE_TIME=${MAX_RESPONSE_TIME:-30}
+      - EMBEDDING_BATCH_SIZE=${EMBEDDING_BATCH_SIZE:-50}
+      - MAX_CONCURRENT_EMBEDDINGS=${MAX_CONCURRENT_EMBEDDINGS:-10}
+      - MAX_CONCURRENT_LLM_CALLS=${MAX_CONCURRENT_LLM_CALLS:-5}
+      - ENABLE_IMAGE_EXTRACTION=${ENABLE_IMAGE_EXTRACTION:-true}
+      - ENABLE_TABLE_EXTRACTION=${ENABLE_TABLE_EXTRACTION:-true}
+      - ENABLE_VISION_ANALYSIS=${ENABLE_VISION_ANALYSIS:-true}
+      - IMAGE_QUALITY_THRESHOLD=${IMAGE_QUALITY_THRESHOLD:-0.7}
+      - LLAMA_PARSE_RESULT_TYPE=${LLAMA_PARSE_RESULT_TYPE:-markdown}
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/hackrx/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add monitoring with Prometheus and Grafana
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus_data:
+  grafana_data:
