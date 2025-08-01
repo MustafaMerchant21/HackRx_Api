@@ -2,6 +2,12 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
+class HackRxResponse(BaseModel):
+    answers: List[str] = Field(..., description="List of answers to the questions")
+    processing_time: Optional[float] = Field(None, description="Total processing time in seconds")
+    document_type: Optional[str] = Field(None, description="Type of document processed")
+    extraction_method: Optional[str] = Field(None, description="Method used for extraction")
+
 class ClauseUsed(BaseModel):
     clause_id: str = Field(..., description="Unique clause identifier")
     document: str = Field(..., description="Source document")
